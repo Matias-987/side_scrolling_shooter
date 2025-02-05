@@ -16,9 +16,17 @@ public class Restart : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            Controller_Player._Player.gameObject.SetActive(true);
+            if (Controller_Player._Player != null)
+            {
+                Destroy(Controller_Player._Player.gameObject);
+                Controller_Player._Player = null;
+            }
+
             Time.timeScale = 1;
-            SceneManager.LoadScene(0);
+            Controller_Hud.gameOver = false;
+            Controller_Hud.points = 0;
+
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 }
