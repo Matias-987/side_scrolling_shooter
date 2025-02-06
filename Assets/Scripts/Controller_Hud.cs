@@ -57,7 +57,7 @@ public class Controller_Hud : MonoBehaviour
             }
             else if (player.powerUpCount == 5)
             {
-                powerUpText.text = "PowerUp: Option";
+                powerUpText.text = "PowerUp: Magnet";
             }
             else if (player.powerUpCount >= 6)
             {

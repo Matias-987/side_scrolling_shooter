@@ -35,6 +35,10 @@ public class Controller_Player : MonoBehaviour
     private List<Controller_Option> options;
     
     public static Controller_Player _Player;
+
+    internal bool magnetActive = false;
+    private float magnetTimer = 0f;
+    internal float magnetForce = 0f;
     
     private void Awake()
     {
@@ -72,6 +76,16 @@ public class Controller_Player : MonoBehaviour
 
     private void Update()
     {
+        if (magnetActive)
+        {
+            magnetTimer -= Time.deltaTime;
+
+            if (magnetTimer <= 0)
+            {
+                magnetActive = false;
+            }
+        }
+
         CheckForceField();
         ActionInput();
     }
@@ -228,6 +242,13 @@ public class Controller_Player : MonoBehaviour
         {
             lastKeyUp = false;
         }
+    }
+
+    public void ActivateMagnet (float duration, float force)
+    {
+        magnetActive = true;
+        magnetTimer = duration;
+        magnetForce = force;
     }
 
     public virtual void OnCollisionEnter(Collision collision)
