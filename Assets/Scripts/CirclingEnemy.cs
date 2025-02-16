@@ -1,88 +1,32 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class CirclingEnemy : MonoBehaviour
+public class CirclingEnemy : Controller_Enemy
 {
-    public float enemySpeed = 5f;
-    public float enemyDistance = 10f;
+    [Header("Movimiento Circular")]
     public float circleRadius = 3f;
-    public float circleDuration = 2f;
-    public float angularSpeed = 2f;
-    private float angle = 0f;
-    public GameObject powerUp;
-    private Vector3 startPos;
-    private Rigidbody rb;
-    private float circleTimer = 0f;
-    private bool isCircling = false;
+    public float circleSpeed = 2f;
+
+    private Vector3 _circleCenter;
+    private float _angle;
+    private bool _isCircling;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        startPos = transform.position + new Vector3(2f, 0, 0);
+        _circleCenter = transform.position + Vector3.right * 2f;
     }
 
     void FixedUpdate()
     {
-        if (!isCircling)
+        if (_isCircling)
         {
-            rb.velocity = Vector3.left * enemySpeed;
-
-            if (Vector3.Distance(startPos, transform.position) >= enemyDistance)
-            {
-                StartCircling();
-            }
+            _angle += circleSpeed * Time.deltaTime;
+            Vector3 offset = new Vector3(Mathf.Cos(_angle), Mathf.Sin(_angle), 0) * circleRadius;
+            transform.position = _circleCenter + offset;
         }
-
         else
         {
-            angle += Time.deltaTime * 360f / circleDuration;
-            Vector3 offset = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf .Deg2Rad), 0) * circleRadius;
-            rb.velocity = offset * (circleRadius * Mathf.PI * 2 / circleDuration);
-            circleTimer += Time.deltaTime;
-
-            if (circleTimer >= circleDuration)
-            {
-                StopCircling();
-            }
-        }
-    }
-
-    private void StartCircling()
-    {
-        isCircling = true;
-        circleTimer = 0f;
-        startPos = transform.position;
-        rb.velocity = Vector3.zero;
-    }
-
-    private void StopCircling()
-    {
-        isCircling = false;
-        startPos = transform.position;
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Projectile") || collision.gameObject.CompareTag("Laser"))
-        {
-            GeneratePowerUp();
-            Destroy(gameObject);
-            Controller_Hud.points++;
-        }
-
-        if (collision.gameObject.CompareTag("Floor") || collision.gameObject.CompareTag("Ceiling"))
-        {
-            angularSpeed *= -1;
-        }
-    }
-
-    private void GeneratePowerUp()
-    {
-        int rnd = Random.Range(0, 3);
-        if (rnd == 2)
-        {
-            Instantiate(powerUp, transform.position, Quaternion.identity);
+            rb.AddForce(Vector3.left * enemySpeed);
+            if (Vector3.Distance(_circleCenter, transform.position) > 10f) _isCircling = true;
         }
     }
 }

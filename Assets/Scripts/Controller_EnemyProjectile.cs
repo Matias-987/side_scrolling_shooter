@@ -1,31 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Controller_EnemyProjectile : Projectile
 {
-    private GameObject player;
-
-    private Vector3 direction;
-
-    private Rigidbody rb;
-
     public float enemyProjectileSpeed;
+    private Vector3 playerDirection;
+    private Rigidbody rb;
 
     void Start()
     {
-        if (Controller_Player._Player != null)
-        {
-            player = Controller_Player._Player.gameObject;
-            direction = -(this.transform.localPosition - player.transform.localPosition).normalized;
-        }
         rb = GetComponent<Rigidbody>();
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null) playerDirection = (player.transform.position - transform.position).normalized;
     }
 
-    
-    public override void Update()
-    {
-        rb.AddForce(direction*enemyProjectileSpeed);
-        base.Update();
-    }
+    void FixedUpdate() => rb.AddForce(playerDirection * enemyProjectileSpeed);
 }

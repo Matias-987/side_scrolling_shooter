@@ -1,44 +1,27 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    public float xLimit = 30;
-    public float yLimit = 20;
-    
-    virtual public void Update()
+    public float xLimit = 30, yLimit = 20;
+
+    protected virtual void Update() => CheckLimits();
+
+    // Método virtual para límites
+    protected virtual void CheckLimits()
     {
-        CheckLimits();
+        if (transform.position.x > xLimit || transform.position.x < -xLimit || transform.position.y > yLimit || transform.position.y < -yLimit)
+        {
+            Destroy(gameObject);
+        }
     }
 
-    internal virtual void OnCollisionEnter(Collision collision)
+    // Método virtual para colisiones (requerido para el error CS0115)
+    protected virtual void OnCollisionEnter(Collision collision)
     {
+        // Comportamiento base: Destruir al chocar con paredes/suelo
         if (collision.gameObject.CompareTag("Wall") || collision.gameObject.CompareTag("Floor"))
         {
-            Destroy(this.gameObject);
+            Destroy(gameObject);
         }
     }
-
-    internal virtual void CheckLimits()
-    {
-        if (this.transform.position.x > xLimit)
-        {
-            Destroy(this.gameObject);
-        }
-        if (this.transform.position.x < -xLimit)
-        {
-            Destroy(this.gameObject);
-        }
-        if (this.transform.position.y > yLimit)
-        {
-            Destroy(this.gameObject);
-        }
-        if (this.transform.position.y < -yLimit)
-        {
-            Destroy(this.gameObject);
-        }
-
-    }
-
 }

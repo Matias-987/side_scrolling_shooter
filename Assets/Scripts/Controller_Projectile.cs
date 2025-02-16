@@ -1,28 +1,17 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Controller_Projectile : Projectile
 {
     public float projectileSpeed;
+    protected Rigidbody rb;
 
-    public Rigidbody rb;
+    void Start() => rb = GetComponent<Rigidbody>();
 
-    void Start()
-    {
-        rb=GetComponent<Rigidbody>();
-    }
-
-    
-    public override void Update()
+    protected override void Update()
     {
         ProjectileDirection();
-        base.Update();
+        base.Update();  // Ejecuta el Update() de Projectile
     }
 
-    public virtual void ProjectileDirection()
-    {
-        rb.velocity = new Vector3(1 * projectileSpeed, rb.velocity.y, 0);
-    }
+    public virtual void ProjectileDirection() => rb.velocity = Vector3.right * projectileSpeed;
 }

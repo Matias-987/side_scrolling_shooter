@@ -1,28 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class Controller_Hud : MonoBehaviour
 {
-    public Text gameOverText;
-
+    public Text gameOverText, pointsText, powerUpText;
     public static bool gameOver;
-
     public static int points;
-
-    public Text pointsText;
-
-    public Text powerUpText;
-
     private Controller_Player player;
 
     void Start()
     {
-        gameOver = false;
-        gameOverText.gameObject.SetActive(false);
-        points = 0;
         player = GameObject.Find("Player").GetComponent<Controller_Player>();
+        gameOverText.gameObject.SetActive(false);
     }
 
     void Update()
@@ -30,40 +19,23 @@ public class Controller_Hud : MonoBehaviour
         if (gameOver)
         {
             Time.timeScale = 0;
-            gameOverText.text = "Game Over" ;
             gameOverText.gameObject.SetActive(true);
         }
-        if (player!=null)
+        pointsText.text = $"Puntos: {points}";
+        powerUpText.text = player.magnetActive ? "Iman activo!" : $"Power-Ups: {player.powerUpCount}";
+    }
+
+    private string GetPowerUpStatus()
+    {
+        return player.powerUpCount switch
         {
-            if (player.powerUpCount <= 0)
-            {
-                powerUpText.text = "PowerUp: None";
-            }
-            else if (player.powerUpCount == 1)
-            {
-                powerUpText.text = "PowerUp: Speed Up";
-            }
-            else if (player.powerUpCount == 2)
-            {
-                powerUpText.text = "PowerUp: Missile";
-            }
-            else if (player.powerUpCount == 3)
-            {
-                powerUpText.text = "PowerUp: Double shoot";
-            }
-            else if (player.powerUpCount == 4)
-            {
-                powerUpText.text = "PowerUp: Laser";
-            }
-            else if (player.powerUpCount == 5)
-            {
-                powerUpText.text = "PowerUp: Magnet";
-            }
-            else if (player.powerUpCount >= 6)
-            {
-                powerUpText.text = "PowerUp: Shield";
-            }
-        }
-        pointsText.text = "Score: " + points.ToString();
+            1 => "PowerUp: Speed Boost",
+            2 => "PowerUp: Missiles",
+            3 => "PowerUp: Double Shot",
+            4 => "PowerUp: Laser",
+            5 => "PowerUp: Options",
+            >= 6 => "PowerUp: Force Field",
+            _ => "PowerUp: None"
+        };
     }
 }

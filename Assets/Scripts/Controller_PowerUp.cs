@@ -1,27 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Controller_PowerUp : Projectile
 {
-    private Rigidbody rb;
-    private Transform player;
-
-    private void Start()
+    protected override void OnCollisionEnter(Collision collision)
     {
-        rb = GetComponent<Rigidbody>();
-        player = Controller_Player._Player.transform;
-    }
-
-    private void FixedUpdate()
-    {
-        Vector3 movement = new Vector3(-0.7f, 0, 0);
-
-        if (Controller_Player._Player.magnetActive)
+        if (collision.gameObject.CompareTag("Player"))
         {
-            Vector3 direction = (player.position - transform.position).normalized;
-            movement += direction * Controller_Player._Player.magnetForce;
+            // Lógica de recolección del power-up
+            Destroy(gameObject);
         }
-        rb.velocity = movement;
+
+        base.OnCollisionEnter(collision); // Llama a la lógica base (destrucción con muros/suelo)
     }
 }
