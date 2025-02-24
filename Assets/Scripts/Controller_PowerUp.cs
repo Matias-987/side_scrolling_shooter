@@ -5,23 +5,38 @@ using UnityEngine;
 public class Controller_PowerUp : Projectile
 {
     private Rigidbody rb;
-    private Transform player;
+    private bool isAttracted;
 
-    private void Start()
+    void Start()
     {
         rb = GetComponent<Rigidbody>();
-        player = Controller_Player._Player.transform;
     }
 
-    private void FixedUpdate()
+    void FixedUpdate()
     {
-        Vector3 movement = new Vector3(-0.7f, 0, 0);
-
-        if (Controller_Player._Player.magnetActive)
+        // Atracción hacia el jugador si el imán está activo
+        if (isAttracted && Controller_Player.Instance.magnetActive)
         {
-            Vector3 direction = (player.position - transform.position).normalized;
-            movement += direction * Controller_Player._Player.magnetForce;
+            Vector3 direction = (Controller_Player.Instance.transform.position - transform.position).normalized;
+            rb.velocity = direction * 15f;
         }
-        rb.velocity = movement;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        // Si entra en el área del imán y este está activo
+        if (other.CompareTag("Magnet") && Controller_Player.Instance.magnetActive)
+        {
+            isAttracted = true;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        // Si sale del área del imán
+        if (other.CompareTag("Magnet"))
+        {
+            isAttracted = false;
+        }
     }
 }

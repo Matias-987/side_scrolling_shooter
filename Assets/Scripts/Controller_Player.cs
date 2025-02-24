@@ -19,7 +19,9 @@ public class Controller_Player : MonoBehaviour
     internal bool doubleShoot;
     internal bool missiles;
     internal float missileCount;
-    internal float shootingCount=0;
+    internal float missileCooldown = 2f;
+    internal float missileTimer = 0f;
+    internal float shootingCount = 0f;
     internal bool forceField;
     internal bool laserOn;
 
@@ -36,12 +38,23 @@ public class Controller_Player : MonoBehaviour
     
     public static Controller_Player _Player;
 
-    internal bool magnetActive = false;
-    private float magnetTimer = 0f;
-    internal float magnetForce = 0f;
+    public static Controller_Player Instance;
+    public bool magnetActive = false;
+    public GameObject Magnet;
+    internal float magnetTimer;
     
     private void Awake()
     {
+        if(Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
         if (_Player == null)
         {
             _Player = GameObject.FindObjectOfType<Controller_Player>();
@@ -72,25 +85,33 @@ public class Controller_Player : MonoBehaviour
         laserOn = false;
         forceField = false;
         options = new List<Controller_Option>();
+        if (Magnet != null)
+        {
+            Magnet.SetActive(false);
+        }
     }
 
     private void Update()
     {
+        CheckForceField();
+        ActionInput();
+
+        if (missileTimer > 0)
+        {
+            missileTimer -= Time.deltaTime;
+        }
+
         if (magnetActive)
         {
             magnetTimer -= Time.deltaTime;
-
             if (magnetTimer <= 0)
             {
-                magnetActive = false;
+                DeactivateMagnet();
             }
+
         }
-
-        CheckForceField();
-        ActionInput();
     }
-
-    private void CheckForceField()
+        private void CheckForceField()
     {
         if (forceField)
         {
@@ -145,6 +166,16 @@ public class Controller_Player : MonoBehaviour
             {
                 laser.GetComponent<Controller_Laser>().relase = false;
             }
+
+            if (missiles)
+            {
+                // Verifica si termino el cooldown
+                if (missileTimer <= 0)
+                {
+                    Instantiate(missileProjectile, transform.position, Quaternion.Euler(0, 0, 90));
+                    missileTimer = missileCooldown; // Reinicia el cooldown
+                }
+            }
             shootingCount = 0.1f;
         }
         else
@@ -191,9 +222,14 @@ public class Controller_Player : MonoBehaviour
             {
                 OptionListing();
             }
-            else if (powerUpCount >= 6)
+            else if (powerUpCount == 6)
             {
                 forceField = true;
+                powerUpCount = 0;
+            }
+            else if (powerUpCount == 7)
+            {
+                ActivateMagnet();
                 powerUpCount = 0;
             }
         }
@@ -244,11 +280,25 @@ public class Controller_Player : MonoBehaviour
         }
     }
 
-    public void ActivateMagnet (float duration, float force)
+    public void ActivateMagnet()
     {
+        float duration = 10f;
         magnetActive = true;
         magnetTimer = duration;
-        magnetForce = force;
+        if(Magnet != null)
+        {
+            Magnet.SetActive(true);
+        }
+        Invoke("DeactivateMagnet", duration); // Desactiva después de "duration" segundos
+    }
+
+    private void DeactivateMagnet()
+    {
+        magnetActive = false;
+        if(Magnet != null)
+        {
+            Magnet.SetActive(false);
+        }
     }
 
     public virtual void OnCollisionEnter(Collision collision)
@@ -267,10 +317,13 @@ public class Controller_Player : MonoBehaviour
                 Controller_Hud.gameOver = true;
             }
         }
+    }
 
-        if (collision.gameObject.CompareTag("PowerUp"))
+    public virtual void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("PowerUp"))
         {
-            Destroy(collision.gameObject);
+            Destroy(other.gameObject);
             powerUpCount++;
         }
     }

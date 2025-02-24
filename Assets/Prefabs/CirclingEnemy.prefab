@@ -147,8 +147,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemySpeed: 10
+  xLimit: 0
+  enemyProjectile: {fileID: 2708450068394556265, guid: 79ea6a2f480704548a3396a2715e551b,
+    type: 3}
+  powerUp: {fileID: 4517337200887749597, guid: 6e4570f9333e45646a8605a1c5ac603e, type: 3}
+  minShootCooldown: 3
+  maxShootCooldown: 8
   enemyDistance: 10
   circleRadius: 3
   circleDuration: 2
   angularSpeed: 2
-  powerUp: {fileID: 4517337200887749597, guid: 6e4570f9333e45646a8605a1c5ac603e, type: 3}

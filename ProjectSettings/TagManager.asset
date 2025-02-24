@@ -12,6 +12,7 @@ TagManager:
   - Projectile
   - Ceiling
   - Laser
+  - Magnet
   layers:
   - Default
   - TransparentFX

@@ -15,6 +15,8 @@ public class Controller_Hud : MonoBehaviour
 
     public Text powerUpText;
 
+    public Text magnetTimer;
+
     private Controller_Player player;
 
     void Start()
@@ -57,13 +59,21 @@ public class Controller_Hud : MonoBehaviour
             }
             else if (player.powerUpCount == 5)
             {
-                powerUpText.text = "PowerUp: Magnet";
+                powerUpText.text = "PowerUp: Second ship";
             }
-            else if (player.powerUpCount >= 6)
+            else if (player.powerUpCount == 6)
             {
                 powerUpText.text = "PowerUp: Shield";
             }
+            else if(player.powerUpCount == 7)
+            {
+                powerUpText.text = "PowerUp: Magnet";
+            }
         }
         pointsText.text = "Score: " + points.ToString();
+        if (Controller_Player.Instance.magnetActive)
+        {
+            magnetTimer.text = $"Magnet: {Controller_Player.Instance.magnetTimer.ToString("0.0")}";
+        }
     }
 }

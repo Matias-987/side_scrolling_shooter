@@ -2,15 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CirclingEnemy : MonoBehaviour
+public class CirclingEnemy : Controller_Enemy
 {
-    public float enemySpeed = 5f;
     public float enemyDistance = 10f;
     public float circleRadius = 3f;
     public float circleDuration = 2f;
     public float angularSpeed = 2f;
     private float angle = 0f;
-    public GameObject powerUp;
     private Vector3 startPos;
     private Rigidbody rb;
     private float circleTimer = 0f;
@@ -60,29 +58,5 @@ public class CirclingEnemy : MonoBehaviour
     {
         isCircling = false;
         startPos = transform.position;
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Projectile") || collision.gameObject.CompareTag("Laser"))
-        {
-            GeneratePowerUp();
-            Destroy(gameObject);
-            Controller_Hud.points++;
-        }
-
-        if (collision.gameObject.CompareTag("Floor") || collision.gameObject.CompareTag("Ceiling"))
-        {
-            angularSpeed *= -1;
-        }
-    }
-
-    private void GeneratePowerUp()
-    {
-        int rnd = Random.Range(0, 3);
-        if (rnd == 2)
-        {
-            Instantiate(powerUp, transform.position, Quaternion.identity);
-        }
     }
 }

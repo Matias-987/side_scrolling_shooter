@@ -86,13 +86,13 @@ public class Controller_Option : MonoBehaviour
     }
 
 
-    //void OnEnable()
-    //{
-    //    Controller_Player._Player.OnShooting += Shoot;
-    //}
+    /*void OnEnable()
+    {
+        Controller_Player._Player.OnShooting += Shoot;
+    }
 
     void OnDisable()
     {
         Controller_Player._Player.OnShooting -= Shoot;
-    }
+    }*/
 }

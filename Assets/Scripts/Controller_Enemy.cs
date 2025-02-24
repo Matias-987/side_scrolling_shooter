@@ -15,9 +15,12 @@ public class Controller_Enemy : MonoBehaviour
 
     public GameObject powerUp;
 
+    public float minShootCooldown = 3f;
+    public float maxShootCooldown = 8f;
+
     void Start()
     {
-        shootingCooldown = UnityEngine.Random.Range(1, 10);
+        shootingCooldown = UnityEngine.Random.Range(minShootCooldown, maxShootCooldown);
     }
 
     public virtual void Update()
@@ -34,7 +37,7 @@ public class Controller_Enemy : MonoBehaviour
             if (shootingCooldown <= 0)
             {
                 Instantiate(enemyProjectile, transform.position, Quaternion.identity);
-                shootingCooldown = UnityEngine.Random.Range(1, 10);
+                shootingCooldown = UnityEngine.Random.Range(minShootCooldown, maxShootCooldown);
             }
         }
     }
@@ -65,7 +68,7 @@ public class Controller_Enemy : MonoBehaviour
         }
     }
 
-    private void GeneratePowerUp()
+    public void GeneratePowerUp()
     {
         int rnd = UnityEngine.Random.Range(0, 3);
         if (rnd == 2)

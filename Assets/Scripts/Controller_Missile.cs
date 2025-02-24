@@ -1,84 +1,98 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Controller_Missile : Projectile
 {
+    public float homingForce = 5f;
+    public float explosionRadius = 5f;
+    public float explosionForce = 500f;
+    public GameObject explosionEffect;
+
+    private Transform target;
     private Rigidbody rb;
-    private RaycastHit hit;
-
-    public Vector3 normalForce;
-    public Vector3 collidingForce;
-    public Vector3 wallForce;
-
-    private bool wallColliding, floorColiding;
-
-
-    private Quaternion initialRotation;
+    private bool impactado = false; // Evita múltiples explosiones
+    private bool yaExplotado = false;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        wallColliding = false;
-        floorColiding = false;
-        initialRotation = transform.rotation;
-        Physics.IgnoreLayerCollision(9, 9);
-    }
-
-    public override void Update()
-    {
-        if (Physics.Raycast(transform.position,Vector3.right, out hit, 3))
-        {
-            Debug.DrawRay(transform.position, Vector3.right * hit.distance, Color.yellow);
-            this.transform.localRotation = new Quaternion(transform.localRotation.x,transform.localRotation.y,hit.collider.GetComponent<Transform>().localRotation.z-initialRotation.z,transform.localRotation.w);
-            wallForce = new Vector3(wallForce.x, hit.collider.GetComponent<Transform>().rotation.z*30,wallForce.z );
-            wallColliding = true;
-        }
-        else
-        {
-            wallColliding = false;
-            Debug.DrawRay(transform.position, Vector3.right * 3, Color.white);
-            //this.transform.rotation = initialRotation;
-        }
-        base.Update();
+        FindClosestEnemy();
     }
 
     void FixedUpdate()
     {
-        if (wallColliding)
+        if (target != null)
         {
-            rb.AddForce(wallForce);
-        }
-        else
-        {
-            this.transform.rotation = initialRotation;
-            if (floorColiding)
-            {
-                rb.AddForce(collidingForce);
-            }
-            else
-            {
-                rb.AddForce(normalForce);
-            }
+            Vector3 direction = (target.position - transform.position).normalized;
+            rb.AddForce(direction * homingForce);
         }
     }
-
 
     internal override void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Floor"))
+        if (!impactado)
         {
-            floorColiding = true;
-            normalForce = new Vector3(normalForce.x, -10, normalForce.z);
+            // Detona al chocar con capas específicas (ajusta según tu juego)
+            if (collision.gameObject.CompareTag("Wall") || collision.gameObject.CompareTag("Floor") || collision.gameObject.CompareTag("Enemy"))
+            {
+                impactado = true;
+                Explotar();
+                Destroy(gameObject);
+            }
         }
     }
 
-    private void OnCollisionExit(Collision collision)
+    void Explotar()
     {
-        if (collision.gameObject.CompareTag("Floor"))
+        if (!yaExplotado)
         {
-            floorColiding = false;
-            normalForce = new Vector3(normalForce.x, -30, normalForce.z);
+            yaExplotado = true;
+
+            // Efecto de explosión
+            if (explosionEffect != null)
+            {
+                GameObject particulas = Instantiate(explosionEffect, transform.position, Quaternion.identity);
+                Destroy(particulas, 2f);
+            }
+
+            // Detecta enemigos en el radio
+            Collider[] hitEnemies = Physics.OverlapSphere(transform.position, explosionRadius);
+            foreach (Collider enemy in hitEnemies)
+            {
+                if (enemy.CompareTag("Enemy"))
+                {
+                    // Llama a la lógica de muerte del enemigo (generar power-up y puntos)
+                    Controller_Enemy enemyScript = enemy.GetComponent<Controller_Enemy>();
+                    if (enemyScript != null)
+                    {
+                        enemyScript.GeneratePowerUp();
+                        Controller_Hud.points++;
+                    }
+                    Destroy(enemy.gameObject); // Destruye al enemigo
+                }
+
+                // Fuerza física en el área (opcional)
+                Rigidbody rb = enemy.GetComponent<Rigidbody>();
+                if (rb != null)
+                {
+                    rb.AddExplosionForce(explosionForce, transform.position, explosionRadius);
+                }
+            }
+        }
+    }
+
+    void FindClosestEnemy()
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        float closestDistance = Mathf.Infinity;
+
+        foreach (GameObject enemy in enemies)
+        {
+            float distance = Vector3.Distance(transform.position, enemy.transform.position);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                target = enemy.transform;
+            }
         }
     }
 }
