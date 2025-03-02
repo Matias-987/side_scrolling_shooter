@@ -12,6 +12,7 @@ public class Projectile : MonoBehaviour
         CheckLimits();
     }
 
+    // Destruye el proyectil al impactar con alguna superficie
     internal virtual void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Wall") || collision.gameObject.CompareTag("Floor"))
@@ -20,6 +21,7 @@ public class Projectile : MonoBehaviour
         }
     }
 
+    // Destruye el proyectil al salir de los limites de la pantalla
     internal virtual void CheckLimits()
     {
         if (this.transform.position.x > xLimit)
@@ -40,5 +42,4 @@ public class Projectile : MonoBehaviour
         }
 
     }
-
 }

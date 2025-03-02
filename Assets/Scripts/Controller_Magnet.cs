@@ -11,6 +11,7 @@ public class Controller_Magnet : MonoBehaviour
 
     void Start()
     {
+        // Configuracion de los colliders
         magnetCollider = gameObject.AddComponent<SphereCollider>();
         magnetCollider.isTrigger = true;
         magnetCollider.radius = attractionRadius;

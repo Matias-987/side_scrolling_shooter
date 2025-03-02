@@ -7,7 +7,7 @@ public class Controller_Missile : Projectile
     public float explosionForce = 500f;
     public GameObject explosionEffect;
 
-    private Transform target;
+    public GameObject target;
     private Rigidbody rb;
     private bool impactado = false; // Evita múltiples explosiones
     private bool yaExplotado = false;
@@ -22,25 +22,54 @@ public class Controller_Missile : Projectile
     {
         if (target != null)
         {
-            Vector3 direction = (target.position - transform.position).normalized;
+            Vector3 direction = (target.transform.position - transform.position).normalized;
             rb.AddForce(direction * homingForce);
+        }
+    }
+
+    // Busca al enemigo mas cercano
+    void FindClosestEnemy()
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        float closestDistance = Mathf.Infinity;
+
+        GameObject aux = null;
+        foreach (GameObject enemy in enemies)
+        {
+            float distance = Vector3.Distance(transform.position, enemy.transform.position);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                aux = enemy;
+            }
+        }
+        
+        if (aux != null)
+        {
+            target = aux;
+            aux.GetComponent<Controller_Enemy>().AddObservers(gameObject);
+        }
+        else
+        {
+            Explotar();
+            Destroy(gameObject);
         }
     }
 
     internal override void OnCollisionEnter(Collision collision)
     {
-        if (!impactado)
+        base.OnCollisionEnter(collision);
+
+        if (!impactado && collision.gameObject.CompareTag("Enemy"))
         {
-            // Detona al chocar con capas específicas (ajusta según tu juego)
-            if (collision.gameObject.CompareTag("Wall") || collision.gameObject.CompareTag("Floor") || collision.gameObject.CompareTag("Enemy"))
-            {
-                impactado = true;
-                Explotar();
-                Destroy(gameObject);
-            }
+            target.GetComponent<Controller_Enemy>().RemoveObservers(gameObject);
+            impactado = true;
+            Explotar();
+            Destroy(gameObject);
         }
     }
 
+    //Logica de la explosion
     void Explotar()
     {
         if (!yaExplotado)
@@ -80,19 +109,8 @@ public class Controller_Missile : Projectile
         }
     }
 
-    void FindClosestEnemy()
+    public void OnNotifyObservers()
     {
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        float closestDistance = Mathf.Infinity;
-
-        foreach (GameObject enemy in enemies)
-        {
-            float distance = Vector3.Distance(transform.position, enemy.transform.position);
-            if (distance < closestDistance)
-            {
-                closestDistance = distance;
-                target = enemy.transform;
-            }
-        }
+        FindClosestEnemy();
     }
 }

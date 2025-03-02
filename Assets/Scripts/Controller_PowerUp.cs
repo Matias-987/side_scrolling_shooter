@@ -7,9 +7,12 @@ public class Controller_PowerUp : Projectile
     private Rigidbody rb;
     private bool isAttracted;
 
+    public float moveSpeed = 5f;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        rb.velocity = Vector3.left * moveSpeed;
     }
 
     void FixedUpdate()
@@ -18,7 +21,11 @@ public class Controller_PowerUp : Projectile
         if (isAttracted && Controller_Player.Instance.magnetActive)
         {
             Vector3 direction = (Controller_Player.Instance.transform.position - transform.position).normalized;
-            rb.velocity = direction * 15f;
+            rb.velocity = (Vector3.left * moveSpeed) + (direction * 15f);  // Velocidad aumentaa por el iman
+        }
+        else
+        {
+            rb.velocity = Vector3.left * moveSpeed;  // Mantener velocidad base
         }
     }
 

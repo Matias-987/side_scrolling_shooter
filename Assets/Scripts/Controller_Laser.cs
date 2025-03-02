@@ -4,17 +4,14 @@ using UnityEngine;
 
 public class Controller_Laser : Projectile
 {
-    public float maxGrowth;
+    public float maxGrowth; 
     public float laserSpeed;
-    public bool relase;
+    public bool relase; 
+
     private Vector3 maxGrowthVector;
-
     private Rigidbody rb;
-
     public GameObject parent;
-
-    private float relaseCounter=0.2f;
-
+    private float relaseCounter = 0.2f;
     private SphereCollider sphereCollider;
 
     void Start()
@@ -27,6 +24,7 @@ public class Controller_Laser : Projectile
 
     public override void Update()
     {
+        // Temporizador para activar los colliders
         relaseCounter -= Time.deltaTime;
         if (relaseCounter <= 0)
         {
@@ -48,6 +46,7 @@ public class Controller_Laser : Projectile
     {
         if (!relase)
         {
+            // Crece hasta alcanzar el tamaño maximo
             if (transform.localScale.magnitude < maxGrowthVector.magnitude)
             {
                 transform.localScale=new Vector3(transform.localScale.x+0.1f, transform.localScale.y + 0.1f, transform.localScale.z + 0.1f);

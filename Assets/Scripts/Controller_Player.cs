@@ -6,7 +6,6 @@ using UnityEngine;
 public class Controller_Player : MonoBehaviour
 {
     public float speed = 5;
-
     private Rigidbody rb;
 
     public GameObject projectile;
@@ -14,37 +13,36 @@ public class Controller_Player : MonoBehaviour
     public GameObject missileProjectile;
     public GameObject laserProjectile;
     public GameObject option;
-    public int powerUpCount=0;
+    public int powerUpCount = 0;
 
     internal bool doubleShoot;
     internal bool missiles;
     internal float missileCount;
-    internal float missileCooldown = 2f;
+    internal float missileCooldown = 4f;
     internal float missileTimer = 0f;
-    internal float shootingCount = 0f;
+    internal bool missileActive = false;
     internal bool forceField;
     internal bool laserOn;
 
     public static bool lastKeyUp;
-
     public delegate void Shooting();
     public event Shooting OnShooting;
+    public float shootCooldownFixed = 0.3f;
+    private float shootingCooldown;
 
     private Renderer render;
-
     internal GameObject laser;
-
     private List<Controller_Option> options;
-    
-    public static Controller_Player _Player;
 
+    public static Controller_Player _Player;
     public static Controller_Player Instance;
     public bool magnetActive = false;
     public GameObject Magnet;
     internal float magnetTimer;
-    
+
     private void Awake()
     {
+        // Implementacion del patron singleton
         if(Instance == null)
         {
             Instance = this;
@@ -79,6 +77,8 @@ public class Controller_Player : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         render = GetComponent<Renderer>();
+        // Inicializa los estados
+        shootingCooldown = 0;
         powerUpCount = 0;
         doubleShoot = false;
         missiles = false;
@@ -111,7 +111,9 @@ public class Controller_Player : MonoBehaviour
 
         }
     }
-        private void CheckForceField()
+
+    // Chequea si el escudo esta activo y cambia el color del jugador en base a eso
+    private void CheckForceField()
     {
         if (forceField)
         {
@@ -128,13 +130,15 @@ public class Controller_Player : MonoBehaviour
         Movement();
     }
 
+    // Maneja el input del jugador
     public virtual void ActionInput()
     {
         missileCount -= Time.deltaTime;
-        shootingCount -= Time.deltaTime;
-        if (Input.GetKey(KeyCode.O) && shootingCount<0)
+        shootingCooldown -= Time.deltaTime;
+        if (Input.GetKey(KeyCode.O) && shootingCooldown < 0)
         {
-            if (OnShooting!=null)
+
+            if (OnShooting != null)
             {
                 OnShooting();
             }
@@ -167,16 +171,13 @@ public class Controller_Player : MonoBehaviour
                 laser.GetComponent<Controller_Laser>().relase = false;
             }
 
-            if (missiles)
+            if (missiles && missileTimer <= 0)
             {
-                // Verifica si termino el cooldown
-                if (missileTimer <= 0)
-                {
-                    Instantiate(missileProjectile, transform.position, Quaternion.Euler(0, 0, 90));
-                    missileTimer = missileCooldown; // Reinicia el cooldown
-                }
+                GameObject missile = Instantiate(missileProjectile, transform.position, Quaternion.Euler(0, 0, 90));
+                missile.GetComponent<Controller_Missile>();
+                missileTimer = missileCooldown;
             }
-            shootingCount = 0.1f;
+            ResetCooldown();
         }
         else
         {
@@ -232,6 +233,20 @@ public class Controller_Player : MonoBehaviour
                 ActivateMagnet();
                 powerUpCount = 0;
             }
+            else if (powerUpCount == 8)
+            {
+                shootCooldownFixed *= 0.5f;
+                powerUpCount = 0;
+            }
+        }
+    }
+
+    private void ResetCooldown()
+    {
+        shootingCooldown = shootCooldownFixed;
+        if (powerUpCount == 1)
+        {
+            shootingCooldown *= 0.5f;
         }
     }
 
@@ -244,7 +259,7 @@ public class Controller_Player : MonoBehaviour
             options.Add(op.GetComponent<Controller_Option>());
             powerUpCount = 0;
         }
-        else if(options.Count == 1)
+        /*else if(options.Count == 1)
         {
             op = Instantiate(option, new Vector3(transform.position.x - 1, transform.position.y + 2, transform.position.z), Quaternion.identity);
             options.Add(op.GetComponent<Controller_Option>());
@@ -261,9 +276,10 @@ public class Controller_Player : MonoBehaviour
             op = Instantiate(option, new Vector3(transform.position.x - 1.5f, transform.position.y + 4, transform.position.z), Quaternion.identity);
             options.Add(op.GetComponent<Controller_Option>());
             powerUpCount = 0;
-        }
+        }*/
     }
 
+    // Logica del movimiento
     private void Movement()
     {
         float inputX = Input.GetAxis("Horizontal");
@@ -280,6 +296,7 @@ public class Controller_Player : MonoBehaviour
         }
     }
 
+    // Logica de activacion del iman
     public void ActivateMagnet()
     {
         float duration = 10f;
@@ -292,6 +309,7 @@ public class Controller_Player : MonoBehaviour
         Invoke("DeactivateMagnet", duration); // Desactiva después de "duration" segundos
     }
 
+    // Logica de desactivacion del iman
     private void DeactivateMagnet()
     {
         magnetActive = false;
@@ -301,6 +319,7 @@ public class Controller_Player : MonoBehaviour
         }
     }
 
+    // Logica de colisiones
     public virtual void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Enemy")|| collision.gameObject.CompareTag("EnemyProjectile"))

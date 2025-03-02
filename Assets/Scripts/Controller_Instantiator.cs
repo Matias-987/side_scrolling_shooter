@@ -5,20 +5,11 @@ using UnityEngine;
 
 public class Controller_Instantiator : MonoBehaviour
 {
-    public float timer=7;
-
-    public  List<GameObject> enemies;
-
+    public float timer = 7;
+    public List<GameObject> enemies;
     public GameObject instantiatePos;
-
     private float time = 0;
-
     private int multiplier = 20;
-
-    void Start()
-    {
-        
-    }
 
     void Update()
     {
@@ -33,10 +24,10 @@ public class Controller_Instantiator : MonoBehaviour
         if (time > multiplier)
         {
             multiplier *= 2;
-            //Increase velocity
         }
     }
 
+    // Spawnea a los enemigos
     private void SpawnEnemies()
     {
         if (timer <= 0)
@@ -49,7 +40,7 @@ public class Controller_Instantiator : MonoBehaviour
                 Vector3 transform = new Vector3(offsetX, instantiatePos.transform.position.y, instantiatePos.transform.position.z);
                 Instantiate(enemies[rnd], transform,Quaternion.identity);
             }
-            timer = 7;
+            timer = 5;
         }
     }
 }

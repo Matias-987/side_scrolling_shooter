@@ -13,6 +13,8 @@ TagManager:
   - Ceiling
   - Laser
   - Magnet
+  - Limit
+  - GameOverLimit
   layers:
   - Default
   - TransparentFX
